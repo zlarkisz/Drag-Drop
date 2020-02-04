@@ -1,28 +1,72 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div class="block">
+      <img ref="img" src="./assets/logo.png" />
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'app',
-  components: {
-    HelloWorld
+  name: "App",
+
+  methods: {
+    moveImg() {
+      const img = this.$refs.img;
+
+      img.onmousedown = e => {
+        let coords = getCoords(img);
+        let shiftX = e.pageX - coords.left;
+        let shiftY = e.pageY - coords.top;
+
+        img.style.position = "absolute";
+        document.querySelector(".block").appendChild(img);
+        moveAt(e);
+
+        img.style.zIndex = 10000;
+
+        function moveAt(e) {
+          img.style.left = `${e.pageX - shiftX}px`;
+          img.style.top = `${e.pageY - shiftY}px`;
+        }
+
+        document.onmousemove = e => {
+          moveAt(e);
+        };
+
+        img.onmouseup = () => {
+          document.onmousemove = null;
+          img.onmouseup = null;
+        };
+
+        img.ondragstart = () => false;
+
+        function getCoords(elem) {
+          let box = elem.getBoundingClientRect();
+          console.log(box)
+
+          return {
+            top: box.top + pageYOffset,
+            left: box.left + pageXOffset
+          };
+        }
+      };
+    }
+  },
+
+  mounted() {
+    this.moveImg();
   }
-}
+};
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+* {
+  padding: 0;
+  margin: 0;
+}
+.block {
+  width: 100vw;
+  height: 100vh;
 }
 </style>
