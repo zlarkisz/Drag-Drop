@@ -1,7 +1,10 @@
 <template>
   <div id="app">
-    <div class="block">
-      <img ref="img" src="./assets/logo.png" />
+    <div ref="slider" class="slider">
+      <img
+        ref="img"
+        src="./assets/wildlife-safari-animals-zookeepers-nature-forest-jungle-giraffe-funny-gift-thomas-larch-transparent.jpeg"
+      />
     </div>
   </div>
 </template>
@@ -10,63 +13,73 @@
 export default {
   name: "App",
 
-  methods: {
-    moveImg() {
-      const img = this.$refs.img;
-
-      img.onmousedown = e => {
-        let coords = getCoords(img);
-        let shiftX = e.pageX - coords.left;
-        let shiftY = e.pageY - coords.top;
-
-        img.style.position = "absolute";
-        document.querySelector(".block").appendChild(img);
-        moveAt(e);
-
-        img.style.zIndex = 10000;
-
-        function moveAt(e) {
-          img.style.left = `${e.pageX - shiftX}px`;
-          img.style.top = `${e.pageY - shiftY}px`;
-        }
-
-        document.onmousemove = e => {
-          moveAt(e);
-        };
-
-        img.onmouseup = () => {
-          document.onmousemove = null;
-          img.onmouseup = null;
-        };
-
-        img.ondragstart = () => false;
-
-        function getCoords(elem) {
-          let box = elem.getBoundingClientRect();
-          console.log(box)
-
-          return {
-            top: box.top + pageYOffset,
-            left: box.left + pageXOffset
-          };
-        }
-      };
-    }
-  },
-
   mounted() {
     this.moveImg();
+  },
+
+  methods: {
+    moveImg() {
+      let thumb = this.$refs.img;
+      let slider = this.$refs.slider;
+      let thumbWidth = thumb.offsetWidth
+
+      thumb.onmousedown = event => {
+        event.preventDefault();
+
+        let shift = event.clientX - thumb.getBoundingClientRect().left;
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.addEventListener("mouseup", onMouseUp);
+
+        function onMouseMove(event) {
+          let newLeft = `${event.clientX - shift - slider.getBoundingClientRect().left}`;
+
+          if (newLeft < - thumbWidth / 2) {
+            newLeft = - thumbWidth / 2;
+          }
+
+          let rightEdge = slider.offsetWidth - thumb.offsetWidth;
+
+          if (newLeft > rightEdge + thumbWidth / 2) {
+            newLeft = rightEdge + thumbWidth / 2;
+          }
+
+          thumb.style.left = `${newLeft}px`;
+        }
+
+        function onMouseUp() {
+          document.removeEventListener("mouseup", onMouseUp);
+          document.removeEventListener("mousemove", onMouseMove);
+        }
+      };
+
+      thumb.ondragstart = () => false;
+    }
   }
 };
 </script>
 
 <style>
 * {
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
-.block {
-  width: 100vw;
-  height: 100vh;
+
+.slider {
+  width: 600px;
+  border-radius: 5px;
+  background: #e0e0e0;
+  background: linear-gradient(left top, #e0e0e0, #eeeeee);
+  height: 15px;
+  margin: 300px auto;
+}
+
+img {
+  height: 150px;
+  width: 150px;
+  position: relative;
+  cursor: pointer;
+  bottom: 75px;
+  left: calc(50% - 75px);
 }
 </style>
